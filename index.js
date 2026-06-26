@@ -2,21 +2,26 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// 1. إعداد الذكاء الاصطناعي من جوجل
+// 1. إعداد الذكاء الاصطناعي من جوجل (Gemini)
 const aiKey = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenerativeAI(aiKey);
 const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// 2. إعداد وتشغيل بوت واتساب
+// 2. إعداد وتشغيل بوت واتساب (تعديل إعدادات Puppeteer لتعمل على Render)
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
+        executablePath: '/usr/bin/google-chrome-stable', // 👈 هذا السطر يحل مشكلة اختفاء الكروم
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--single-process'
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
         ]
     }
 });
@@ -34,15 +39,18 @@ client.on('ready', () => {
 
 // 5. استقبال الرسائل والرد عليها بالذكاء الاصطناعي
 client.on('message', async (msg) => {
+    // الرد فقط على المحادثات الفردية وتجاهل المجموعات
     if (msg.from.endsWith('@c.us')) {
         try {
             const chat = await msg.getChat();
-            await chat.sendStateTyping(); 
+            await chat.sendStateTyping(); // إظهار جاري الكتابة...
 
+            // إرسال رسالة المستخدم إلى Gemini
             const result = await model.generateContent(msg.body);
             const response = await result.response;
             const replyText = response.text();
 
+            // رد البوت على المستخدم
             await msg.reply(replyText);
         } catch (error) {
             console.error('حدث خطأ أثناء معالجة الرسالة:', error);
