@@ -1,17 +1,18 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const { GoogleGenerativeAI } = require('@google/generative-ai'); // تم تعديل الاسم هنا بدقة
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // 1. إعداد الذكاء الاصطناعي من جوجل
 const aiKey = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenerativeAI(aiKey);
-const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" }); // استخدام أحدث نموذج مجاني وسريع
+const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// 2. إعداد وتشغيل بوت واتساب
+// 2. إعداد وتشغيل بوت واتساب وتحديد مسار كروم للسيرفر المجاني
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
+        executablePath: '/opt/render/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome', // تحديد المسار بدقة كما طلبه السيرفر
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
