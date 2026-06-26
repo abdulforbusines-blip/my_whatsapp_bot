@@ -7,12 +7,12 @@ const aiKey = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenerativeAI(aiKey);
 const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// 2. إعداد وتشغيل بوت واتساب (تعديل إعدادات Puppeteer لتعمل على Render)
+// 2. إعداد وتشغيل بوت واتساب
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        executablePath: '/usr/bin/google-chrome-stable', // 👈 هذا السطر يحل مشكلة اختفاء الكروم
+        // تم حذف سطر executablePath القديم ليعتمد السيرفر على الكروم الداخلي تلقائياً
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -39,18 +39,15 @@ client.on('ready', () => {
 
 // 5. استقبال الرسائل والرد عليها بالذكاء الاصطناعي
 client.on('message', async (msg) => {
-    // الرد فقط على المحادثات الفردية وتجاهل المجموعات
     if (msg.from.endsWith('@c.us')) {
         try {
             const chat = await msg.getChat();
-            await chat.sendStateTyping(); // إظهار جاري الكتابة...
+            await chat.sendStateTyping(); 
 
-            // إرسال رسالة المستخدم إلى Gemini
             const result = await model.generateContent(msg.body);
             const response = await result.response;
             const replyText = response.text();
 
-            // رد البوت على المستخدم
             await msg.reply(replyText);
         } catch (error) {
             console.error('حدث خطأ أثناء معالجة الرسالة:', error);
