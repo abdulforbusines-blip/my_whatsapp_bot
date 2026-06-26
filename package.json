@@ -4,8 +4,7 @@
   "description": "WhatsApp Bot with Gemini AI",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "start": "node index.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.1.0",
