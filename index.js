@@ -1,34 +1,21 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const puppeteer = require('puppeteer');
 const qrcode = require('qrcode-terminal');
 
-const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
+(async () => {
+    const browser = await puppeteer.launch({
         headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage'
-        ]
-    }
-});
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
-// QR Code
-client.on('qr', (qr) => {
-    console.log('QR RECEIVED');
-    qrcode.generate(qr, { small: true });
-});
+    const page = await browser.newPage();
 
-// Ready
-client.on('ready', () => {
-    console.log('BOT IS READY');
-});
+    await page.goto('https://web.whatsapp.com');
 
-// Message
-client.on('message', msg => {
-    if (msg.body.toLowerCase() === 'hi') {
-        msg.reply('Hello 👋 Bot is working!');
-    }
-});
+    console.log("📌 امسح QR من هنا:");
 
-client.initialize();
+    // نعرض QR من الصفحة
+    page.on('console', msg => {
+        console.log(msg.text());
+    });
+
+})();
