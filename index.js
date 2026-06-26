@@ -1,17 +1,23 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const { GoogleGenAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/generative-ai'); // تم تعديل الاسم هنا بدقة
 
 // 1. إعداد الذكاء الاصطناعي من جوجل
 const aiKey = process.env.GEMINI_API_KEY;
-const ai = new GoogleGenAI(aiKey);
-const model = ai.getGenerativeModel({ model: "gemini-pro" });
+const ai = new GoogleGenerativeAI(aiKey);
+const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" }); // استخدام أحدث نموذج مجاني وسريع
 
 // 2. إعداد وتشغيل بوت واتساب
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process'
+        ]
     }
 });
 
@@ -28,11 +34,10 @@ client.on('ready', () => {
 
 // 5. استقبال الرسائل والرد عليها بالذكاء الاصطناعي
 client.on('message', async (msg) => {
-    // يرد فقط على الخاص وتجنب المجموعات
     if (msg.from.endsWith('@c.us')) {
         try {
             const chat = await msg.getChat();
-            await chat.sendStateTyping(); // إظهار جاري الكتابة...
+            await chat.sendStateTyping(); 
 
             const result = await model.generateContent(msg.body);
             const response = await result.response;
