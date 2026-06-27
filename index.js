@@ -12,12 +12,11 @@ const client = new Client({
     }
 });
 
-// عرض QR في الطرفية بحجم أوضح
+// عرض QR في الطرفية بحجم أوضح + حفظه كصورة
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: false }); // حجم أكبر
     console.log('📲 امسح الكود من واتساب للدخول (مرة واحدة فقط)');
 
-    // حفظ QR كصورة أيضًا
     QRCode.toFile('qr.png', qr, function (err) {
         if (err) throw err;
         console.log('📂 تم حفظ QR في ملف qr.png (افتحه وامسحه بالكاميرا)');
