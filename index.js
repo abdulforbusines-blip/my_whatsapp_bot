@@ -1,21 +1,32 @@
-const puppeteer = require('puppeteer');
+const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
-(async () => {
-    const browser = await puppeteer.launch({
-        headless: true,
+// إنشاء عميل واتساب
+const client = new Client({
+    puppeteer: {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    }
+});
 
-    const page = await browser.newPage();
+// عرض QR في الطرفية لتسجيل الدخول
+client.on('qr', (qr) => {
+    qrcode.generate(qr, { small: true });
+    console.log('📲 امسح الكود للدخول إلى واتساب');
+});
 
-    await page.goto('https://web.whatsapp.com');
+// عند تسجيل الدخول
+client.on('ready', () => {
+    console.log('✅ البوت جاهز للعمل');
+});
 
-    console.log("📌 امسح QR من هنا:");
+// مثال: الرد على أي رسالة تصل
+client.on('message', async msg => {
+    console.log(`📩 رسالة من ${msg.from}: ${msg.body}`);
 
-    // نعرض QR من الصفحة
-    page.on('console', msg => {
-        console.log(msg.text());
-    });
+    if (msg.body.toLowerCase() === 'مرحبا') {
+        await msg.reply('أهلاً! كيف حالك؟');
+    }
+});
 
-})();
+// تشغيل العميل
+client.initialize();
