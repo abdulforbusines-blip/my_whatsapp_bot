@@ -1,8 +1,10 @@
 const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const chromium = require('chromium');
 
 const client = new Client({
     puppeteer: {
+        executablePath: chromium.path, // تحديد المسار الصحيح للمتصفح
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
