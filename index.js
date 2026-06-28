@@ -1,36 +1,78 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+require("dotenv").config();
+
+const express = require("express");
+const { Client, LocalAuth } = require("whatsapp-web.js");
+const qrcode = require("qrcode-terminal");
+const OpenAI = require("openai");
+const puppeteer = require("puppeteer");
+
+const app = express();
+
+const clientAI = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        executablePath: puppeteer.executablePath(),
+        headless: true,
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-zygote",
+            "--single-process",
+            "--no-first-run"
+        ]
     }
 });
 
-client.on('qr', (qr) => {
+client.on("qr", qr => {
+    console.log("امسح QR");
     qrcode.generate(qr, { small: true });
-    console.log('📌 امسح هذا الكود من واتساب على هاتفك عبر الأجهزة المقترنة → ربط جهاز');
 });
 
-client.on('ready', () => {
-    console.log('✅ البوت جاهز للعمل');
+client.on("authenticated", () => {
+    console.log("Authenticated");
 });
 
-client.on('message', async msg => {
-    const now = new Date();
-    const hour = now.getHours();
+client.on("ready", () => {
+    console.log("WhatsApp Ready");
+});
 
-    const startHour = 9;   // بداية الدوام (9 صباحًا)
-    const endHour = 17;    // نهاية الدوام (5 مساءً)
+client.on("message", async message => {
 
-    if (hour >= startHour && hour < endHour) {
-        // الرد في أوقات الدوام على أي رسالة
-        await msg.reply(`👋 أهلاً! شكراً لرسالتك. نحن متاحون الآن لأننا في وقت الدوام.`);
-    } else {
-        // خارج أوقات الدوام
-        await msg.reply(`⏰ حالياً خارج أوقات الدوام. سنرد عليك لاحقاً.`);
+    if (message.fromMe) return;
+
+    try {
+
+        const response = await clientAI.responses.create({
+            model: "gpt-5",
+            input: message.body
+        });
+
+        await message.reply(response.output_text);
+
+    } catch (err) {
+
+        console.log(err);
+
+        await message.reply("حدث خطأ.");
+
     }
+
 });
 
 client.initialize();
+
+app.get("/", (req, res) => {
+    res.send("Bot Running");
+});
+
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+    console.log("Server Started");
+});
