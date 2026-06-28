@@ -1,31 +1,35 @@
 const express = require("express");
-const { Client, NoAuth } = require("whatsapp-web.js");
+const { Client } = require("whatsapp-web.js");
 
 const app = express();
 
 const client = new Client({
-    authStrategy: new NoAuth(),
     puppeteer: {
         headless: true,
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--single-process"
+            "--disable-dev-shm-usage"
         ]
-    },
-    webVersionCache: {
-        type: "none"
     }
 });
 
-client.on("qr", qr => {
-    console.log("SCAN THIS QR:");
+client.on("qr", (qr) => {
+    console.log("\n===== SCAN THIS QR =====\n");
     console.log(qr);
+    console.log("\n========================\n");
 });
 
 client.on("ready", () => {
     console.log("WhatsApp Ready");
+});
+
+client.on("auth_failure", () => {
+    console.log("Auth Failed - try again");
+});
+
+client.on("authenticated", () => {
+    console.log("Authenticated");
 });
 
 client.on("message", msg => {
