@@ -1,16 +1,9 @@
 const express = require("express");
-const { Client, LocalAuth } = require("whatsapp-web.js");
-const { execSync } = require("child_process");
+const { Client } = require("whatsapp-web.js");
 
 const app = express();
 
-/* 🔥 إصلاح Chrome في Render */
-try {
-    execSync("npx puppeteer browsers install chrome");
-} catch (e) {}
-
 const client = new Client({
-    authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
         args: [
@@ -23,12 +16,20 @@ const client = new Client({
 });
 
 client.on("qr", qr => {
-    console.log("SCAN THIS QR:");
+    console.log("SCAN QR BELOW:");
     console.log(qr);
 });
 
 client.on("ready", () => {
     console.log("WhatsApp Ready");
+});
+
+client.on("auth_failure", msg => {
+    console.log("AUTH FAILED", msg);
+});
+
+client.on("disconnected", reason => {
+    console.log("Disconnected:", reason);
 });
 
 client.initialize();
