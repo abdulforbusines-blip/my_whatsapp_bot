@@ -18,20 +18,31 @@ const client = new Client({
 });
 
 client.on("qr", qr => {
-    console.log("QR:");
+    console.log("SCAN THIS QR:");
     console.log(qr);
 });
 
 client.on("ready", () => {
-    console.log("WhatsApp Ready");
+    console.log("✅ WhatsApp Ready");
+});
+
+client.on("message", msg => {
+    if (msg.body === "ping") {
+        msg.reply("pong");
+    }
+
+    if (msg.body === "hello") {
+        msg.reply("hi 👋");
+    }
 });
 
 client.initialize();
 
 app.get("/", (req, res) => {
-    res.send("Bot running");
+    res.send("Bot is running");
 });
 
-app.listen(process.env.PORT || 10000, () => {
-    console.log("Server started");
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+    console.log("Server started on port", PORT);
 });
