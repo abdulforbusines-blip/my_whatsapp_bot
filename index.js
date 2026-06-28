@@ -1,41 +1,36 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const QRCode = require('qrcode');
-const chromium = require('chromium');
 
-// إعداد عميل واتساب مع حفظ الجلسة
 const client = new Client({
-    authStrategy: new LocalAuth(), // يحفظ الجلسة في مجلد .wwebjs_auth
+    authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: chromium.path,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     }
 });
 
-// عرض QR في الطرفية بحجم أوضح + حفظه كصورة
 client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: false }); // حجم أكبر
-    console.log('📲 امسح الكود من واتساب للدخول (مرة واحدة فقط)');
-
-    QRCode.toFile('qr.png', qr, function (err) {
-        if (err) throw err;
-        console.log('📂 تم حفظ QR في ملف qr.png (افتحه وامسحه بالكاميرا)');
-    });
+    qrcode.generate(qr, { small: true });
+    console.log('📌 امسح هذا الكود من واتساب على هاتفك عبر الأجهزة المقترنة → ربط جهاز');
 });
 
-// عند تسجيل الدخول
 client.on('ready', () => {
-    console.log('✅ البوت جاهز للعمل بدون إعادة مسح QR');
+    console.log('✅ البوت جاهز للعمل');
 });
 
-// مثال: الرد على أي رسالة تصل
 client.on('message', async msg => {
-    console.log(`📩 رسالة من ${msg.from}: ${msg.body}`);
+    const now = new Date();
+    const hour = now.getHours();
 
-    if (msg.body.toLowerCase() === 'مرحبا') {
-        await msg.reply('أهلاً! كيف حالك؟');
+    const startHour = 9;   // بداية الدوام (9 صباحًا)
+    const endHour = 17;    // نهاية الدوام (5 مساءً)
+
+    if (hour >= startHour && hour < endHour) {
+        // الرد في أوقات الدوام على أي رسالة
+        await msg.reply(`👋 أهلاً! شكراً لرسالتك. نحن متاحون الآن لأننا في وقت الدوام.`);
+    } else {
+        // خارج أوقات الدوام
+        await msg.reply(`⏰ حالياً خارج أوقات الدوام. سنرد عليك لاحقاً.`);
     }
 });
 
-// تشغيل العميل
 client.initialize();
