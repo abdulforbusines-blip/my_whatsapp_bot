@@ -5,12 +5,14 @@ const app = express();
 
 const client = new Client({
     puppeteer: {
-        headless: true,
+        headless: "new",
+        executablePath: process.env.CHROME_PATH || undefined,
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
             "--disable-dev-shm-usage",
-            "--single-process"
+            "--disable-gpu",
+            "--no-zygote"
         ]
     },
     webVersionCache: {
@@ -18,11 +20,8 @@ const client = new Client({
     }
 });
 
-// 🔥 مهم جدًا: تعطيل الكاش الداخلي بالكامل
-client.pupPage = null;
-
 client.on("qr", (qr) => {
-    console.log("\nSCAN THIS QR:\n");
+    console.log("SCAN THIS QR:");
     console.log(qr);
 });
 
@@ -30,10 +29,8 @@ client.on("ready", () => {
     console.log("WhatsApp Ready");
 });
 
-client.on("message", msg => {
-    if (msg.body === "ping") {
-        msg.reply("pong");
-    }
+client.on("auth_failure", () => {
+    console.log("AUTH FAILED");
 });
 
 client.initialize();
