@@ -1,18 +1,10 @@
 const express = require("express");
-const { Client } = require("whatsapp-web.js");
+const { Client, LocalAuth } = require("whatsapp-web.js");
 
 const app = express();
 
 const client = new Client({
-    puppeteer: {
-        headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--single-process"
-        ]
-    }
+    authStrategy: new LocalAuth()
 });
 
 client.on("qr", qr => {
