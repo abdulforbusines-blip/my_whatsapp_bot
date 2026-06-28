@@ -1,10 +1,11 @@
+const express = require("express");
 const { Client, LocalAuth } = require("whatsapp-web.js");
-const puppeteer = require("puppeteer");
+
+const app = express();
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: puppeteer.executablePath(),
         headless: true,
         args: [
             "--no-sandbox",
@@ -26,3 +27,11 @@ client.on("ready", () => {
 });
 
 client.initialize();
+
+app.get("/", (req, res) => {
+    res.send("Bot running");
+});
+
+app.listen(process.env.PORT || 10000, () => {
+    console.log("Server started");
+});
