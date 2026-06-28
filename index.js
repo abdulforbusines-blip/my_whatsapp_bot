@@ -1,11 +1,13 @@
 const express = require("express");
 const { Client, LocalAuth } = require("whatsapp-web.js");
+const puppeteer = require("puppeteer");
 
 const app = express();
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
+        executablePath: puppeteer.executablePath(),
         headless: true,
         args: [
             "--no-sandbox",
@@ -18,31 +20,20 @@ const client = new Client({
 });
 
 client.on("qr", qr => {
-    console.log("SCAN THIS QR:");
+    console.log("SCAN QR:");
     console.log(qr);
 });
 
 client.on("ready", () => {
-    console.log("✅ WhatsApp Ready");
-});
-
-client.on("message", msg => {
-    if (msg.body === "ping") {
-        msg.reply("pong");
-    }
-
-    if (msg.body === "hello") {
-        msg.reply("hi 👋");
-    }
+    console.log("WhatsApp Ready");
 });
 
 client.initialize();
 
 app.get("/", (req, res) => {
-    res.send("Bot is running");
+    res.send("Bot running");
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log("Server started on port", PORT);
+app.listen(process.env.PORT || 10000, () => {
+    console.log("Server started");
 });
