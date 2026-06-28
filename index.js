@@ -9,27 +9,25 @@ const client = new Client({
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage"
+            "--disable-dev-shm-usage",
+            "--single-process"
         ]
+    },
+    webVersionCache: {
+        type: "none"
     }
 });
 
+// 🔥 مهم جدًا: تعطيل الكاش الداخلي بالكامل
+client.pupPage = null;
+
 client.on("qr", (qr) => {
-    console.log("\n===== SCAN THIS QR =====\n");
+    console.log("\nSCAN THIS QR:\n");
     console.log(qr);
-    console.log("\n========================\n");
 });
 
 client.on("ready", () => {
     console.log("WhatsApp Ready");
-});
-
-client.on("auth_failure", () => {
-    console.log("Auth Failed - try again");
-});
-
-client.on("authenticated", () => {
-    console.log("Authenticated");
 });
 
 client.on("message", msg => {
