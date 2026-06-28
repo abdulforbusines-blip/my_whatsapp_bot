@@ -1,38 +1,26 @@
 const express = require("express");
-const { Client, LocalAuth } = require("whatsapp-web.js");
+const { Client } = require("whatsapp-web.js");
 
 const app = express();
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
         args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--no-zygote",
-            "--single-process"
+            "--disable-dev-shm-usage"
         ]
-    },
-    webVersionCache: {
-        type: "none"
     }
 });
 
 client.on("qr", qr => {
-    console.log("SCAN QR:");
+    console.log("SCAN THIS QR:");
     console.log(qr);
 });
 
 client.on("ready", () => {
     console.log("WhatsApp Ready");
-});
-
-client.on("message", msg => {
-    if (msg.body === "ping") {
-        msg.reply("pong");
-    }
 });
 
 client.initialize();
